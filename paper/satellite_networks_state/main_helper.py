@@ -26,6 +26,45 @@ import satgen
 import os
 
 
+# Keys expected in a config file, in the same order as the command-line arguments
+CONFIG_KEYS = [
+    "duration_s",
+    "time_step_ms",
+    "isl_selection",
+    "gs_selection",
+    "dynamic_state_algorithm",
+    "num_threads",
+]
+
+
+def read_config_args(config_filename):
+    """
+    Read the generation arguments from a config file with one "key=value" per line.
+    Empty lines and lines starting with # are ignored.
+
+    :param config_filename: Path to the config file
+
+    :return: List of argument values (strings) in the same order as the command-line arguments
+    """
+    config = {}
+    with open(config_filename, "r") as f_in:
+        for line_num, line in enumerate(f_in, start=1):
+            line = line.strip()
+            if line == "" or line.startswith("#"):
+                continue
+            if "=" not in line:
+                raise ValueError("Line %d of %s is not of the form key=value: %s" % (line_num, config_filename, line))
+            key, value = line.split("=", 1)
+            key = key.strip()
+            if key not in CONFIG_KEYS:
+                raise ValueError("Unknown key in %s: %s (allowed: %s)" % (config_filename, key, ", ".join(CONFIG_KEYS)))
+            config[key] = value.strip()
+    missing = [key for key in CONFIG_KEYS if key not in config]
+    if missing:
+        raise ValueError("Missing keys in %s: %s" % (config_filename, ", ".join(missing)))
+    return [config[key] for key in CONFIG_KEYS]
+
+
 class MainHelper:
 
     def __init__(

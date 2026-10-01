@@ -1,0 +1,19 @@
+# Starlink-550 state generation for one orbit
+# Usage: python main_starlink_550.py --config config_starlink_550_one_orbit.txt
+
+# Orbital period = 86400 s / 15.19 rev/day ~= 5688 s
+duration_s=5688
+
+# How often forwarding state is recomputed (paper default is 100)
+time_step_ms=1000
+
+# isls_plus_grid or isls_none
+isl_selection=isls_plus_grid
+
+# ground_stations_top_100 or ground_stations_paris_moscow_grid
+gs_selection=ground_stations_top_100
+
+# algorithm_free_one_only_over_isls, algorithm_free_one_only_gs_relays or algorithm_paired_many_only_over_isls
+dynamic_state_algorithm=algorithm_free_one_only_over_isls
+
+num_threads=6

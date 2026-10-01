@@ -1,5 +1,21 @@
 import math
 import networkx as nx
+from scipy.sparse.csgraph import dijkstra
+
+
+def calculate_all_pairs_shortest_path_distances(graph):
+    """
+    Calculate the shortest path distance between all pairs of nodes in the graph.
+
+    The result is the same as nx.floyd_warshall_numpy(graph), but it runs Dijkstra
+    from every node, which is much faster for sparse graphs such as satellite networks.
+
+    :param graph: Undirected networkx graph with edge attribute "weight" (must be > 0)
+
+    :return: Numpy matrix of distances, indexed in the order of the graph's nodes (inf if unreachable)
+    """
+    adjacency = nx.to_scipy_sparse_array(graph, nodelist=list(graph), weight="weight")
+    return dijkstra(adjacency, directed=False)
 
 
 def calculate_fstate_shortest_path_without_gs_relaying(
@@ -18,9 +34,8 @@ def calculate_fstate_shortest_path_without_gs_relaying(
 
     # Calculate shortest path distances
     if enable_verbose_logs:
-        print("  > Calculating Floyd-Warshall for graph without ground-station relays")
-    # (Note: Numpy has a deprecation warning here because of how networkx uses matrices)
-    dist_sat_net_without_gs = nx.floyd_warshall_numpy(sat_net_graph_only_satellites_with_isls)
+        print("  > Calculating all-pairs shortest paths for graph without ground-station relays")
+    dist_sat_net_without_gs = calculate_all_pairs_shortest_path_distances(sat_net_graph_only_satellites_with_isls)
 
     # Forwarding state
     fstate = {}
@@ -168,9 +183,8 @@ def calculate_fstate_shortest_path_with_gs_relaying(
 
     # Calculate shortest paths
     if enable_verbose_logs:
-        print("  > Calculating Floyd-Warshall for graph including ground-station relays")
-    # (Note: Numpy has a deprecation warning here because of how networkx uses matrices)
-    dist_sat_net = nx.floyd_warshall_numpy(sat_net_graph)
+        print("  > Calculating all-pairs shortest paths for graph including ground-station relays")
+    dist_sat_net = calculate_all_pairs_shortest_path_distances(sat_net_graph)
 
     # Forwarding state
     fstate = {}

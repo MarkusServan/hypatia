@@ -54,9 +54,11 @@ def generate_dynamic_state(
     prev_output = None
     i = 0
     total_iterations = ((simulation_end_time_ns - offset_ns) / time_step_ns)
+    # Print progress every 10%, or every iteration if there are fewer than 10
+    progress_interval = max(1, int(math.floor(total_iterations) / 10.0))
     for time_since_epoch_ns in range(offset_ns, simulation_end_time_ns, time_step_ns):
         if not enable_verbose_logs:
-            if i % int(math.floor(total_iterations) / 10.0) == 0:
+            if i % progress_interval == 0:
                 print("Progress: calculating for T=%d (time step granularity is still %d ms)" % (
                     time_since_epoch_ns, time_step_ns / 1000000
                 ))
@@ -102,10 +104,16 @@ def generate_dynamic_state_at(
 
     # Time
     time = epoch + time_since_epoch_ns * u.ns
+
+    # String representations used by the distance calculations
+    # (converting an astropy Time to string is expensive, so it is done only once per time step)
+    epoch_str = str(epoch)
+    time_str = str(time)
+
     if enable_verbose_logs:
-        print("  > Epoch.................. " + str(epoch))
+        print("  > Epoch.................. " + epoch_str)
         print("  > Time since epoch....... " + str(time_since_epoch_ns) + " ns")
-        print("  > Absolute time.......... " + str(time))
+        print("  > Absolute time.......... " + time_str)
 
     # Graphs
     sat_net_graph_only_satellites_with_isls = nx.Graph()
@@ -138,7 +146,7 @@ def generate_dynamic_state_at(
         # TODO: Technically, they can (could just be ignored by forwarding state calculation),
         # TODO: but practically, defining a permanent ISL between two satellites which
         # TODO: can go out of distance is generally unwanted
-        sat_distance_m = distance_m_between_satellites(satellites[a], satellites[b], str(epoch), str(time))
+        sat_distance_m = distance_m_between_satellites(satellites[a], satellites[b], epoch_str, time_str)
         if sat_distance_m > max_isl_length_m:
             raise ValueError(
                 "The distance between two satellites (%d and %d) "
@@ -196,8 +204,8 @@ def generate_dynamic_state_at(
             distance_m = distance_m_ground_station_to_satellite(
                 ground_station,
                 satellites[sid],
-                str(epoch),
-                str(time)
+                epoch_str,
+                time_str
             )
             if distance_m <= max_gsl_length_m:
                 satellites_in_range.append((distance_m, sid))
