@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --account=markase
+#SBATCH --account=shared-ie-idi
 #SBATCH --job-name=generate_constellation
 #SBATCH --time=0-04:00:00
 #SBATCH --partition=CPUQ
@@ -97,5 +97,6 @@ if [ -z "${CESIUM_ACCESS_TOKEN}" ] && [ ! -f "${HYPATIA_DIR}/satviz/cesium_token
 fi
 in_container "${HYPATIA_DIR}/satviz/scripts" python visualize_constellation.py "${NETWORK_DIR}" || exit 1
 in_container "${HYPATIA_DIR}/satviz/scripts" python visualize_path.py "${NETWORK_DIR}" "${PATH_FILE}" "${GEN_TIME_MS}" || exit 1
+in_container "${HYPATIA_DIR}/satviz/scripts" python visualize_paths_over_time.py "${NETWORK_DIR}" "${PATH_FILE}" || exit 1
 
 echo "Constellation generation finished. Visualizations are in ${HYPATIA_DIR}/satviz/viz_output"
