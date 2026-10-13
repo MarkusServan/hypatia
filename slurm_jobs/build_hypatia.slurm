@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --account=markase
+#SBATCH --account=share-ie-idi
 #SBATCH --job-name=build_hypatia
 #SBATCH --time=0-01:00:00
 #SBATCH --partition=CPUQ
