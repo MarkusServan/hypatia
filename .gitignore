@@ -3,3 +3,5 @@
 dev_testing/
 image/
 pyrightconfig.json
+satviz/cesium_token.txt
+satviz/viz_output/*.html
