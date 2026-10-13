@@ -41,4 +41,4 @@ else
 fi
 
 # Perform the build
-./waf -j4 || exit 1
+./waf -j${SLURM_CPUS_PER_TASK:-4} || exit 1
